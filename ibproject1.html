@@ -96,7 +96,7 @@
                 }
 
                 // 85% 이상의 확률로 인식되었고, 매핑된 명령어가 'NONE'이 아닐 경우 전송
-                if (prob > 0.85 && CMD_MAP[bestName] && CMD_MAP[bestName] !== "NONE") {
+                if (prob > 0.20 && CMD_MAP[bestName] && CMD_MAP[bestName] !== "NONE") {
                     sendCmd(CMD_MAP[bestName]);
                 }
             }, {
@@ -111,4 +111,5 @@
     }
     </script>
 </body>
+
 </html>

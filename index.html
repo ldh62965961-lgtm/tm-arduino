@@ -34,8 +34,9 @@
         // ⚠️ 모델의 실제 레이블과 매핑 (현재 문제 해결을 위해 Class 2를 LIGHT_ON에 매핑)
         "Class 2": "LIGHT_ON",       // ⬅️ Class 2가 인식되면 180도 이동 명령
         
-        // --- (추가 명령 설정 - 모델에 Class 3 등이 있다면 여기에 추가) ---
+        // --- (추가 명령 설정 - 실제 모델 레이블에 맞춰 수정 필요) ---
         "Class 1": "LIGHT_OFF",      // Class 1이 있다면 0도 복귀 명령으로 가정
+        "GET_SENSOR": "GET_SENSOR",  // 온습도 측정 명령 (모델에 이 레이블을 학습시켜야 함)
         
         // --- (디버깅용 명령 및 배경 소음) ---
         "배경 소음": "NONE",
@@ -101,7 +102,7 @@
         recognizer.listen(result => {
           const scores = result.scores;
           let maxIdx = scores.indexOf(Math.max(...scores));
-          const best = classLabels[maxIdx]; // ⭐️ 모델이 출력한 실제 레이블
+          const best = classLabels[maxIdx];
           const prob = scores[maxIdx];
 
           // ⭐️ F12 콘솔 로그 (디버깅용)
@@ -116,7 +117,7 @@
           
           const command = CMD_MAP[best];  
           
-          // 확률 70% 이상이고, 유효한 명령어일 때만 전송 (임계값 70%로 상향하여 오작동 방지)
+          // 확률 70% 이상이고, 유효한 명령어일 때만 전송 (임계값 70%로 상향)
           if (prob > 0.7 && command && command !== "NONE") { 
             log(`[명령 감지] "${best}" -> ${command} (확률 ${prob.toFixed(2)})`);
             sendCmd(command);

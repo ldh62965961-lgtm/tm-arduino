@@ -17,15 +17,14 @@
 
     <script>
     // ====== 모델 경로 설정 (GitHub Pages 절대 주소로 수정) ======
-    // ⚠️ 이 주소는 사용자님의 실제 GitHub Pages 주소입니다.
+    // ⚠️ 이 주소를 사용자님의 실제 GitHub Pages 주소로 변경해야 합니다.
     const URL = "https://ldh62965961-lgtm.github.io/tm-arduino/my_model/"; 
     
     // ====== 명령어 매핑: 모델 클래스 이름 → 아두이노로 보낼 문자열 ======
-    // 🚨 반드시 Teachable Machine에서 클래스 이름을 ON_CMD, OFF_CMD로 새로 학습시켜야 합니다.
+    // 🚨 Class 2가 인식되면 LED_ON 명령(서보 180도)이 전송됩니다.
     const CMD_MAP = {
-        "ON_CMD": "LED_ON",        // ON_CMD가 인식되면 180도 회전 명령 전송
-        "OFF_CMD": "LED_OFF",      // OFF_CMD가 인식되면 0도 복귀 명령 전송
-        "background noise": "NONE"
+        "Class 2": "LED_ON",       // ⬅️ Class 2가 인식되면 LED_ON 명령 전송
+        "배경 소음": "NONE"
     };
 
     let port, writer;
@@ -84,7 +83,7 @@
                 const bestName = classLabels[maxIdx];
                 const prob = scores[maxIdx].toFixed(2);
                 
-                // ⚠️ 디버깅 코드: 모든 예측 값을 콘솔에 출력하여 입력 확인
+                // ⚠️ 디버깅 코드: 모든 예측 값을 콘솔에 출력
                 console.log("인식 시도:", bestName, "확률:", prob); 
 
                 for (let i = 0; i < classLabels.length; i++) {
@@ -94,7 +93,7 @@
 
                 // 20% 이상의 확률로 인식되었을 때 명령 실행
                 if (prob > 0.20 && CMD_MAP[bestName] && CMD_MAP[bestName] !== "NONE") {
-                    sendCmd(CMD_MAP[bestName]);
+                    sendCmd(CMD_MAP[bestName]); // CMD_MAP의 값이 아두이노로 전송됩니다.
                 }
             }, {
                 overlapFactor: 0.5,

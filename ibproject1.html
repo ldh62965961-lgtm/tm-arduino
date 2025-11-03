@@ -16,16 +16,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
 
     <script>
-    // ====== 모델 경로 설정 (GitHub Pages 또는 로컬 서버 환경에 맞게) ======
-    // 로컬 서버 사용 시: http://localhost:9000/my_model/
-    // GitHub Pages 사용 시: ./my_model/
-    const URL = "https://ldh62965961-lgtm.github.io/tm-arduino/my_model/";
-
+    // ====== 모델 경로 설정 (GitHub Pages 절대 주소로 반드시 수정) ======
+    // ⚠️ 이 주소를 사용자님의 실제 GitHub Pages 주소로 변경해야 합니다.
+    const URL = "https://ldh62965961-lgtm.github.io/tm-arduino/my_model/"; 
+    
     // ====== 명령어 매핑: 모델 클래스 이름 → 아두이노로 보낼 문자열 ======
-    // Teachable Machine에서 학습시킨 클래스 이름에 맞게 "불 켜줘", "불 꺼줘" 부분을 수정해야 합니다.
     const CMD_MAP = {
-        "불 켜줘": "LED_ON",  // '불 켜줘'라고 인식되면 "LED_ON" 명령 전송
-        "불 꺼줘": "LED_OFF", // '불 꺼줘'라고 인식되면 "LED_OFF" 명령 전송
+        "불 켜줘": "LED_ON",  // 서보 모터 180도 이동 명령
+        "불 꺼줘": "LED_OFF", // 서보 모터 0도 복귀 명령
         "background noise": "NONE"
     };
 
@@ -41,16 +39,13 @@
         }
 
         try {
-            // 사용자에게 포트 선택 요청
             port = await navigator.serial.requestPort();
-            // 아두이노와 동일한 115200 Baud Rate로 연결
             await port.open({ baudRate: 115200 }); 
             writer = port.writable.getWriter();
             console.log("✅ Arduino connected");
             alert("✅ 아두이노 연결 완료! Start Listening을 누르세요.");
         } catch (err) {
             console.error("❌ 연결 실패:", err);
-            // 대부분 'Error: NetworkError: Failed to open serial port' 오류 발생
             alert("❌ 연결 실패: COM 포트가 이미 사용 중이거나 브라우저 권한 문제일 수 있습니다.");
         }
     };
@@ -58,7 +53,6 @@
     // ====== 명령 전송 함수 ======
     async function sendCmd(cmd){
         if(!writer) return;
-        // 아두이노가 줄바꿈 문자를 기다리므로, "\n"을 추가하여 전송합니다.
         await writer.write(new TextEncoder().encode(cmd + "\n"));
         console.log("➡ Sent to Arduino:", cmd);
     }
@@ -83,25 +77,28 @@
             const labelContainer = document.getElementById("label-container");
             labelContainer.innerHTML = classLabels.map(l => `<div>${l}</div>`).join("");
 
-            // 마이크 권한 요청이 여기서 발생합니다.
             recognizer.listen(result => {
                 const scores = result.scores;
                 let maxIdx = scores.indexOf(Math.max(...scores));
                 const bestName = classLabels[maxIdx];
                 const prob = scores[maxIdx].toFixed(2);
+                
+                // ⚠️ 디버깅 코드: 모든 예측 값을 콘솔에 출력하여 입력 확인
+                console.log("인식 시도:", bestName, "확률:", prob); 
 
                 for (let i = 0; i < classLabels.length; i++) {
                     labelContainer.children[i].innerHTML =
                         `${classLabels[i]}: ${scores[i].toFixed(2)}`;
                 }
 
-                // 20% 이상의 확률로 인식되었고, 매핑된 명령어가 'NONE'이 아닐 경우 전송
-                if (prob > 0.2 && CMD_MAP[bestName] && CMD_MAP[bestName] !== "NONE") {
+                // 20% 이상의 확률로 인식되었을 때 명령 실행
+                if (prob > 0.20 && CMD_MAP[bestName] && CMD_MAP[bestName] !== "NONE") {
                     sendCmd(CMD_MAP[bestName]);
                 }
             }, {
                 overlapFactor: 0.5,
                 probabilityThreshold: 0
+                // sampleRate: 44100 옵션은 Windows 설정으로 조정했으므로 코드에서는 제외
             });
             alert("🎤 음성 인식 시작! 마이크에 대고 명령어를 말하세요.");
         } catch (e) {

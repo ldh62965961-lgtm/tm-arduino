@@ -32,8 +32,8 @@
     // ==========================================================
     const CMD_MAP = {
         // ⚠️ 모델이 출력하는 레이블을 여기에 매핑합니다.
-        "Class 2": "onservo",         // ⬅️ Class 2 인식 시 모터 작동 명령 전송
-        "Class 1": "offservo",        // ⬅️ Class 1 인식 시 모터 멈춤 명령 전송 (가정)
+        "커튼 올려줘": "onservo",         // ⬅️ Class 2 인식 시 모터 작동 명령 전송
+        "커튼 내려줘": "offservo",        // ⬅️ Class 1 인식 시 모터 멈춤 명령 전송 (가정)
         "불 켜줘": "onlight",         // 만약 모델이 '불 켜줘'로 학습되었다면
         "불 꺼줘": "offlight",        // 만약 모델이 '불 꺼줘'로 학습되었다면
         "온습도 측정해줘": "temp",    // 만약 모델이 '온습도 측정해줘'로 학습되었다면
@@ -118,7 +118,7 @@
           const command = CMD_MAP[best];  
           
           // 확률 80% 이상이고, 유효한 명령어일 때만 전송
-          if (prob > 0.8 && command && command !== "NONE") { 
+          if (prob > 0.7 && command && command !== "NONE") { 
             log(`[명령 감지] "${best}" -> ${command} (확률 ${prob.toFixed(2)})`);
             sendCmd(command);
           }
@@ -133,4 +133,3 @@
     </script>
 </body>
 </html>
-

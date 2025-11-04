@@ -117,8 +117,8 @@
           
           const command = CMD_MAP[best];  
           
-          // 확률 70% 이상이고, 유효한 명령어일 때만 전송
-          if (prob > 0.7 && command && command !== "NONE") { 
+          // 확률 80% 이상이고, 유효한 명령어일 때만 전송
+          if (prob > 0.8 && command && command !== "NONE") { 
             log(`[명령 감지] "${best}" -> ${command} (확률 ${prob.toFixed(2)})`);
             sendCmd(command);
           }
@@ -133,3 +133,4 @@
     </script>
 </body>
 </html>
+

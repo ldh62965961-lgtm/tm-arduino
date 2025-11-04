@@ -13,7 +13,7 @@
     </style>
 </head>
 <body>
-    <h2>🎤 다기능 음성 제어 (모터 작동 확인)</h2>
+    <h2>🎤 다기능 음성 제어 (최종)</h2>
     <button id="connect">🔌 1. 아두이노 연결</button>
     <button onclick="init()">🎧 2. 음성 인식 시작</button>
     <div id="label-container"></div>
@@ -27,16 +27,16 @@
     const URL ="https://ldh62965961-lgtm.github.io/tm-arduino/my_model1/" ;
 
     // ==========================================================
-    // ⭐️ 1. CMD_MAP (핵심 수정 부분)
-    // Class 2가 인식되면 모터 작동 명령(LIGHT_ON)을 전송합니다.
+    // ⭐️ 1. CMD_MAP (새 아두이노 명령어에 맞게 매핑)
+    // 🚨 Teachable Machine 레이블을 아두이노 명령어로 정확히 매핑합니다.
     // ==========================================================
     const CMD_MAP = {
-        // ⚠️ 모델의 실제 레이블과 매핑 (현재 문제 해결을 위해 Class 2를 LIGHT_ON에 매핑)
-        "Class 2": "LIGHT_ON",       // ⬅️ Class 2가 인식되면 180도 이동 명령
-        
-        // --- (추가 명령 설정 - 실제 모델 레이블에 맞춰 수정 필요) ---
-        "Class 1": "LIGHT_OFF",      // Class 1이 있다면 0도 복귀 명령으로 가정
-        "GET_SENSOR": "GET_SENSOR",  // 온습도 측정 명령 (모델에 이 레이블을 학습시켜야 함)
+        // ⚠️ 모델이 출력하는 레이블을 여기에 매핑합니다.
+        "Class 2": "onservo",         // ⬅️ Class 2 인식 시 모터 작동 명령 전송
+        "Class 1": "offservo",        // ⬅️ Class 1 인식 시 모터 멈춤 명령 전송 (가정)
+        "불 켜줘": "onlight",         // 만약 모델이 '불 켜줘'로 학습되었다면
+        "불 꺼줘": "offlight",        // 만약 모델이 '불 꺼줘'로 학습되었다면
+        "온습도 측정해줘": "temp",    // 만약 모델이 '온습도 측정해줘'로 학습되었다면
         
         // --- (디버깅용 명령 및 배경 소음) ---
         "배경 소음": "NONE",
@@ -92,7 +92,7 @@
         const recognizer = await createModel();
         const classLabels = recognizer.wordLabels();
         const container = document.getElementById("label-container");
-        container.innerHTML = ""; // 이전 내용 초기화
+        container.innerHTML = "";
         classLabels.forEach(l => {
           container.innerHTML += `<div id="label-${l}" class="label">${l}: 0%</div>`;
         });
@@ -117,7 +117,7 @@
           
           const command = CMD_MAP[best];  
           
-          // 확률 70% 이상이고, 유효한 명령어일 때만 전송 (임계값 70%로 상향)
+          // 확률 70% 이상이고, 유효한 명령어일 때만 전송
           if (prob > 0.7 && command && command !== "NONE") { 
             log(`[명령 감지] "${best}" -> ${command} (확률 ${prob.toFixed(2)})`);
             sendCmd(command);
